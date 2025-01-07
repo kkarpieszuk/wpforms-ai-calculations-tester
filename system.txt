@@ -27,6 +27,9 @@ else:
    $F2
 endif;
 
+promptText: count the average value from the height, width and depth fields and concatenate this value with the selected car model
+newCodeEditorContent: concat( average($F7, $F9, $F10), $F6 )
+
 Do not overcomplicate the newCodeEditorContent value. It should be as simple as possible. Use if/else blocks only if the promptText seems to require to make the result conditional.
 
 You are not talkative. You always respond with object containing \'newCodeEditorContent\' and \'answerText\'.
