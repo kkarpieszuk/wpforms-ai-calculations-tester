@@ -136,12 +136,17 @@
     <div class="container" id="responseContainer" style="display: none;">
         <h2>API Response</h2>
         <pre id="response"></pre>
+        <h3>Formula:</h3>
+        <pre id="responseCode"></pre>
+        <h3>Explanation:</h3>
+        <div id="responseExplanation"></div>
     </div>
 
     <script>
         async function loadFileContent(filename) {
             try {
-                const response = await fetch(filename);
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${filename}?v=${timestamp}`);
                 if (!response.ok) {
                     throw new Error(`File ${filename} not found`);
                 }
@@ -225,6 +230,8 @@
             const loadingSpinner = document.getElementById('loadingSpinner');
             const responseContainer = document.getElementById('responseContainer');
             const responseDiv = document.getElementById('response');
+            const responseCode = document.getElementById('responseCode');
+            const responseExplanation = document.getElementById('responseExplanation');
 
             submitButton.disabled = true;
             loadingSpinner.style.display = 'inline-block';
@@ -245,6 +252,16 @@
                 );
 
                 responseDiv.textContent = response.choices[0].message.content;
+
+                // treat content of responseDiv.textContent as json, and take newCodeEditorContent from it and add to responseCode.
+                let newCodeEditorContent = JSON.stringify(JSON.parse(responseDiv.textContent).newCodeEditorContent, null, 2);
+                // trim quotes and replace new line characters with <br>.
+                newCodeEditorContent = newCodeEditorContent.replace(/"/g, '').replace(/\\r\\n/g, '<br>');
+                responseCode.innerHTML = newCodeEditorContent;
+
+                let answerText = JSON.stringify(JSON.parse(responseDiv.textContent).answerText, null, 2);
+                responseExplanation.innerHTML = answerText;
+
                 responseContainer.style.display = 'block';
             } catch (error) {
                 showStatus(`Error: ${error.message}`, true);
