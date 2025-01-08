@@ -251,7 +251,7 @@
                             },
                             "answerText": {
                               "type": "string",
-                              "description": "Text response to be provided in the chat"
+                              "description": "Text response to be provided in the chat, it explains the formula or the reason for the impossibility"
                             },
                             "isImpossible": {
                               "type": "boolean",
@@ -282,7 +282,7 @@
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "gpt-4o",
+                    model: "gpt-4o-mini",
                     messages: [
                         {
                             role: "system",
