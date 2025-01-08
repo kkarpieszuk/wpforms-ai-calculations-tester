@@ -117,7 +117,7 @@
 
             <div class="form-group">
                 <label for="userPrompt">User Prompt:</label>
-                <textarea id="userPrompt" name="userPrompt" placeholder="Enter user prompt" required></textarea>
+                <textarea id="userPrompt" name="userPrompt" placeholder="Enter user prompt" required>add all fields</textarea>
             </div>
 
             <div class="form-group">
@@ -228,6 +228,53 @@
         }
 
         async function callOpenAI(apiKey, systemPrompt, userData) {
+
+            const tools = [
+                {
+                    type: "function",
+                    function: {
+                        "name": "generate_response",
+                        "description": "Generates structured output with mandatory and optional fields.",
+                        "strict": true,
+                        "parameters": {
+                          "type": "object",
+                          "required": [
+                            "newCodeEditorContent",
+                            "answerText",
+                            "isImpossible",
+                            "isImpossibleReason"
+                          ],
+                          "properties": {
+                            "newCodeEditorContent": {
+                              "type": "string",
+                              "description": "The formula to be placed in the code editor"
+                            },
+                            "answerText": {
+                              "type": "string",
+                              "description": "Text response to be provided in the chat"
+                            },
+                            "isImpossible": {
+                              "type": "boolean",
+                              "description": "Indicates if it is impossible to create the formula"
+                            },
+                            "isImpossibleReason": {
+                              "type": "string",
+                              "description": "Reason for the impossibility if isImpossible is true",
+                              "enum": [
+                                "fieldsNotFound",
+                                "unrelatedRequest",
+                                "missingParameters",
+                                "invalidInput",
+                                "none"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                    }
+                }
+            ];
+
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -235,7 +282,7 @@
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "gpt-4o-mini",
+                    model: "gpt-4o",
                     messages: [
                         {
                             role: "system",
@@ -245,7 +292,8 @@
                             role: "user",
                             content: JSON.stringify(userData)
                         }
-                    ]
+                    ],
+                    tools: tools
                 })
             });
 
@@ -287,7 +335,7 @@
                     userData
                 );
 
-                responseDiv.textContent = response.choices[0].message.content;
+                responseDiv.textContent = response.choices[0].message.tool_calls[0].function.arguments;
 
                 // treat content of responseDiv.textContent as json, and take newCodeEditorContent from it and add to responseCode.
                 let newCodeEditorContent = JSON.stringify(JSON.parse(responseDiv.textContent).newCodeEditorContent, null, 2);
